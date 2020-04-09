@@ -1,3 +1,4 @@
 # Redis
-REDIS_HOST = ''
-REDIS_PORT = ''
+REDIS_HOST = '192.168.1.15'
+REDIS_PORT = '6379'
+REDIS_PWD = ''
