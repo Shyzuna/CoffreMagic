@@ -26,6 +26,25 @@ def apiRoot():
 @app.route('/api/coffre', methods=['GET', 'POST'])
 def apiCoffreAll():
     value = bdd.hgetall('coffre')
-    return {
-        'value': str(value)
-    }
+    converted = {}
+    for key, val in value.items():
+        converted[key.decode('utf-8')] = val.decode('utf-8')
+    converted['positions'] = []
+    value = bdd.lrange('coffrePosition', 0, -1)
+    for pos in value:
+        converted['positions'].append(pos.decode('utf-8'))
+    return converted
+
+
+@app.route('/api/config', methods=['GET', 'POST'])
+def apiCoffreConfig():
+    value = bdd.hgetall('coffreConfig')
+    converted = {}
+    for key, val in value.items():
+        converted[key.decode('utf-8')] = val.decode('utf-8')
+    value = bdd.hgetall('coffreElements')
+    convertedBis = {}
+    for key, val in value.items():
+        convertedBis[key.decode('utf-8')] = val.decode('utf-8')
+    converted['elements'] = convertedBis
+    return converted
