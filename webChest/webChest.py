@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 import redis
 from webChest.config import config
 
@@ -17,10 +17,10 @@ def homepage():
 
 @app.route('/api')
 def apiRoot():
-    return {
+    return jsonify({
         'api': 'coffreMagic',
         'version': '0.0.1'
-    }
+    })
 
 
 @app.route('/api/coffre', methods=['GET', 'POST'])
@@ -33,7 +33,7 @@ def apiCoffreAll():
     value = bdd.lrange('coffrePosition', 0, -1)
     for pos in value:
         converted['positions'].append(pos.decode('utf-8'))
-    return converted
+    return jsonify(converted)
 
 
 @app.route('/api/config', methods=['GET', 'POST'])
@@ -47,4 +47,4 @@ def apiCoffreConfig():
     for key, val in value.items():
         convertedBis[key.decode('utf-8')] = val.decode('utf-8')
     converted['elements'] = convertedBis
-    return converted
+    return jsonify(converted)
