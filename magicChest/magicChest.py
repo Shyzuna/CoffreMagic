@@ -54,7 +54,7 @@ def UpdateRedis(bdd, spotsPins, chestPin, pokePin, lightPin):
 
 
 def RedisHmset(bdd, key, d):
-    for k, v in d:
+    for k, v in d.items():
         bdd.hset(key, k, v)
 
 
@@ -115,7 +115,7 @@ if __name__ == '__main__':
         # chest status changed
         if chestPin.value != oldChest:
             # chest is now closed
-            if chestPin.value == 0:
+            if not chestPin.value:
                 print('CHEST CLOSED')
                 # Update Redis values
                 positionValue = UpdateRedis(bdd, spotsPins, chestPin, pokePin, lightPin)
