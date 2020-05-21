@@ -23,9 +23,11 @@ def DisplayValues(spotsPins, chestPin, pokePin, lightPin):
     print('Light : ' + str(lightPin.value))
     print('--------------------')
 
+def InitRedis():
+    print('INIT Redis')
 
 def UpdateRedis(spotsPins, chestPin, pokePin, lightPin):
-    print('UPDATE redis')
+    print('UPDATE Redis')
 
 
 if __name__ == '__main__':
@@ -69,7 +71,16 @@ if __name__ == '__main__':
     lightPin.direction = digitalio.Direction.INPUT
     lightPin.pull = digitalio.Pull.UP
 
-    oldChest = chestPin.value
+    oldChest = chestPin
+
+    # Send base data / config to redis
+    InitRedis()
+    DisplayValues(spotsPins, chestPin, pokePin, lightPin)
+    UpdateRedis(spotsPins, chestPin, pokePin, lightPin)
+    if chestPin.value == 0:
+        # Start Music
+        sd.play(musicData[0], musicData[1])
+        currentMusic = sd.get_stream()
 
     while True:
 
