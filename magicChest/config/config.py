@@ -18,11 +18,11 @@ MOVING_TOYS_MAPPING = {
 }
 
 FIXED_TOYS_PIN = {
-    'POKEBALL': board.D29,
-    'LIGHT': board.D31
+    'POKEBALL': board.D13,
+    'LIGHT': board.D19
 }
 
-CHEST_PIN = board.D33
+CHEST_PIN = board.D26
 
 # Spots
 

@@ -4,8 +4,13 @@ import board
 import adafruit_mcp3xxx.mcp3008 as MCP
 from adafruit_mcp3xxx.analog_in import AnalogIn
 import redis
+import time
 
-import magicChest.config.config as config
+try:
+    from .config import config
+except ImportError as e:
+    from config import config
+
 
 if __name__ == '__main__':
 
@@ -38,15 +43,24 @@ if __name__ == '__main__':
 
     pokePin = digitalio.DigitalInOut(config.FIXED_TOYS_PIN['POKEBALL'])
     pokePin.direction = digitalio.Direction.INPUT
+    pokePin.pull = digitalio.Pull.UP
 
-    light = digitalio.DigitalInOut(config.FIXED_TOYS_PIN['LIGHT'])
-    light.direction = digitalio.Direction.INPUT
+    lightPin = digitalio.DigitalInOut(config.FIXED_TOYS_PIN['LIGHT'])
+    lightPin.direction = digitalio.Direction.INPUT
 
     oldChest = chestPin.value
+
+
     while True:
         # If the chest is newly closed
-        if chestPin.value != oldChest and chestPin.value == 1:
+        #if chestPin.value != oldChest and chestPin.value == 1:
             # Update Redis values
-            print('UPDATE redis')
-        oldChest = chestPin.value
-
+        #    print('UPDATE redis')
+        #oldChest = chestPin.value
+        for k,v in spotsPins.items():
+            print(str(k) + ' : ' + str(v.value))
+        print('Chest : ' + str(chestPin.value))
+        print('Pokeball : ' + str(pokePin.value))
+        print('Light : ' + str(lightPin.value))
+        print('--------------------')
+        time.sleep(1)

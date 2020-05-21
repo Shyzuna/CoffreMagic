@@ -1,6 +1,10 @@
 from flask import Flask, render_template, jsonify
 import redis
-from webChest.config import config
+
+try:
+    from .config import config
+except ImportError as e:
+    from config import config
 
 app = Flask(__name__)
 bdd = redis.Redis(config.REDIS_HOST, config.REDIS_PORT, config.REDIS_PWD)
