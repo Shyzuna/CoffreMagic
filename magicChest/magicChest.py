@@ -30,12 +30,12 @@ def DisplayValues(spotsPins, chestPin, pokePin, lightPin, positionValue):
     print('Light : ' + str(lightPin.value))
     print('--------------------')
 
-def InitRedis(spotsPins):
+def InitRedis(bdd, spotsPins):
     print('INIT REDIS :\nwidth: {}\nheight: 1\nelments: {}'.format(str(len(spotsPins)), str(config.MOVING_TOYS_MAPPING)))
-    bdd.hmset('coffreElements', config.MOVING_TOYS_MAPPING)
-    bdd.hmset('coffreConfig', {'width': len(spotsPins), 'height': 1})
+    RedisHmset(bdd, 'coffreElements', config.MOVING_TOYS_MAPPING)
+    RedisHmset(bdd, 'coffreConfig', {'width': len(spotsPins), 'height': 1})
 
-def UpdateRedis(spotsPins, chestPin, pokePin, lightPin):
+def UpdateRedis(bdd, spotsPins, chestPin, pokePin, lightPin):
     print('UPDATE REDIS')
     i = 0
     positionValue = {}
@@ -49,8 +49,13 @@ def UpdateRedis(spotsPins, chestPin, pokePin, lightPin):
         positionValue[spot] = value
         bdd.lset('coffrePosition', i, value)
         i += 1
-    bdd.hmset('coffre', {'chest': chestPin.value, 'pokeball': pokePin.value, 'light': lightPin.value})
+    RedisHmset(bdd, 'coffre', {'chest': 1 if chestPin.value else 0, 'pokeball': 1 if pokePin.value else 0, 'light': 1 if lightPin.value else 0})
     return positionValue
+
+
+def RedisHmset(bdd, key, d):
+    for k, v in d:
+        bdd.hset(key, k, v)
 
 
 if __name__ == '__main__':
@@ -97,8 +102,8 @@ if __name__ == '__main__':
     oldChest = chestPin
 
     # Send base data / config to redis
-    InitRedis(spotsPins)
-    positionValue = UpdateRedis(spotsPins, chestPin, pokePin, lightPin)
+    InitRedis(bdd, spotsPins)
+    positionValue = UpdateRedis(bdd, spotsPins, chestPin, pokePin, lightPin)
     DisplayValues(spotsPins, chestPin, pokePin, lightPin, positionValue)
     if chestPin.value == 0:
         # Start Music
@@ -113,7 +118,7 @@ if __name__ == '__main__':
             if chestPin.value == 0:
                 print('CHEST CLOSED')
                 # Update Redis values
-                positionValue = UpdateRedis(spotsPins, chestPin, pokePin, lightPin)
+                positionValue = UpdateRedis(bdd, spotsPins, chestPin, pokePin, lightPin)
                 DisplayValues(spotsPins, chestPin, pokePin, lightPin, positionValue)
 
                 # Start Music
