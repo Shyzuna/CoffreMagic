@@ -13,8 +13,8 @@ MOVING_TOYS_VALUES = {
 }
 
 MOVING_TOYS_MAPPING = {
-    'pompier': 0,
-    'patate': 1
+    'pompier': 1,
+    'patate': 2
 }
 
 FIXED_TOYS_PIN = {

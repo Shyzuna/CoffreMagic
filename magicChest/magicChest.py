@@ -127,6 +127,7 @@ if __name__ == '__main__':
             # chest is now open
             else:
                 print('CHEST OPENED')
+                bdd.hset('coffre', 'chest', 1)
                 # Stop Music
                 if currentMusic is not None:
                     currentMusic.stop()
