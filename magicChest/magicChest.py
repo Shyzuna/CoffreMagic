@@ -3,6 +3,9 @@ import digitalio
 import board
 import adafruit_mcp3xxx.mcp3008 as MCP
 from adafruit_mcp3xxx.analog_in import AnalogIn
+import sounddevice as sd
+import soundfile as sf
+from pathlib import Path
 import redis
 import time
 
@@ -12,7 +15,23 @@ except ImportError as e:
     from config import config
 
 
+def DisplayValues(spotsPins, chestPin, pokePin, lightPin):
+    for k, v in spotsPins.items():
+        print(str(k) + ' : ' + str(v.value))
+    print('Chest : ' + str(chestPin.value))
+    print('Pokeball : ' + str(pokePin.value))
+    print('Light : ' + str(lightPin.value))
+    print('--------------------')
+
+
+def UpdateRedis(spotsPins, chestPin, pokePin, lightPin):
+    print('UPDATE redis')
+
+
 if __name__ == '__main__':
+
+    musicData = sf.read(str(Path.cwd().joinpath('assets').joinpath('music').joinpath('music.mp3')))
+    currentMusic = None
 
     bdd = redis.Redis(config.REDIS_HOST, config.REDIS_PORT, config.REDIS_PWD)
 
@@ -36,10 +55,11 @@ if __name__ == '__main__':
         MCP.P6: AnalogIn(mcp, MCP.P6)
     }
 
-    # Value 1 => Close / Linked
-    # Value 0 => Open / Unlinked
+    # Value 0 => Close / Linked
+    # Value 1 => Open / Unlinked
     chestPin = digitalio.DigitalInOut(config.CHEST_PIN)
     chestPin.direction = digitalio.Direction.INPUT
+    chestPin.pull = digitalio.Pull.UP
 
     pokePin = digitalio.DigitalInOut(config.FIXED_TOYS_PIN['POKEBALL'])
     pokePin.direction = digitalio.Direction.INPUT
@@ -47,20 +67,33 @@ if __name__ == '__main__':
 
     lightPin = digitalio.DigitalInOut(config.FIXED_TOYS_PIN['LIGHT'])
     lightPin.direction = digitalio.Direction.INPUT
+    lightPin.pull = digitalio.Pull.UP
 
     oldChest = chestPin.value
 
-
     while True:
-        # If the chest is newly closed
-        #if chestPin.value != oldChest and chestPin.value == 1:
-            # Update Redis values
-        #    print('UPDATE redis')
-        #oldChest = chestPin.value
-        for k,v in spotsPins.items():
-            print(str(k) + ' : ' + str(v.value))
-        print('Chest : ' + str(chestPin.value))
-        print('Pokeball : ' + str(pokePin.value))
-        print('Light : ' + str(lightPin.value))
-        print('--------------------')
-        time.sleep(1)
+
+        # chest status changed
+        if chestPin.value != oldChest:
+            # chest is now closed
+            if chestPin.value == 0:
+                DisplayValues(spotsPins, chestPin, pokePin, lightPin)
+                # Update Redis values
+                UpdateRedis(spotsPins, chestPin, pokePin, lightPin)
+
+                # Start Music
+                sd.play(musicData[0], musicData[1])
+                currentMusic = sd.get_stream()
+            # chest is now open
+            else:
+                # Stop Music
+                if currentMusic is not None:
+                    currentMusic.stop()
+
+        # Music Check loop
+        if currentMusic is not None and not currentMusic.active:
+            sd.play(musicData[0], musicData[1])
+            currentMusic = sd.get_stream()
+
+        oldChest = chestPin.value
+        #time.sleep(1)

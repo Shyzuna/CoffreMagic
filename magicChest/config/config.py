@@ -35,3 +35,8 @@ SPOTS_MAPPING = {
     MCP.P5: 5,
     MCP.P6: 6
 }
+
+# MISC
+
+# Smth better ?
+ADC_THRESHOLD = 15000
