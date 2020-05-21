@@ -32,7 +32,7 @@ def UpdateRedis(spotsPins, chestPin, pokePin, lightPin):
 
 if __name__ == '__main__':
 
-    musicData = sf.read(str(Path.cwd().joinpath('assets').joinpath('music').joinpath('music.mp3')))
+    musicData = sf.read(str(Path.cwd().joinpath('assets').joinpath('music').joinpath('music.avi')))
     currentMusic = None
 
     bdd = redis.Redis(config.REDIS_HOST, config.REDIS_PORT, config.REDIS_PWD)
