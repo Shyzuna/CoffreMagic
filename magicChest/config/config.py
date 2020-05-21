@@ -8,18 +8,18 @@ REDIS_PWD = ''
 
 # Toys
 MOVING_TOYS_VALUES = {
-    'POMPIER': (18000, 22000),
-    'PATATE': (38000, 42000)
+    'pompier': (18000, 22000),
+    'patate': (38000, 42000)
 }
 
 MOVING_TOYS_MAPPING = {
-    'POMPIER': 0,
-    'PATATE': 1
+    'pompier': 0,
+    'patate': 1
 }
 
 FIXED_TOYS_PIN = {
-    'POKEBALL': board.D13,
-    'LIGHT': board.D19
+    'pokeball': board.D13,
+    'light': board.D19
 }
 
 CHEST_PIN = board.D26

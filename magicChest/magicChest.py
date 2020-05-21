@@ -15,19 +15,42 @@ except ImportError as e:
     from config import config
 
 
-def DisplayValues(spotsPins, chestPin, pokePin, lightPin):
+"""
+# Add some error handling (redis)
+# Swap redis keys as config maybe
+"""
+
+def DisplayValues(spotsPins, chestPin, pokePin, lightPin, positionValue):
+    print('--------------------')
+    print('Status')
     for k, v in spotsPins.items():
-        print(str(k) + ' : ' + str(v.value))
+        print(str(k) + ' : ' + str(v.value) + ' ( ' + str(positionValue[k]) + ' )')
     print('Chest : ' + str(chestPin.value))
     print('Pokeball : ' + str(pokePin.value))
     print('Light : ' + str(lightPin.value))
     print('--------------------')
 
-def InitRedis():
-    print('INIT Redis')
+def InitRedis(spotsPins):
+    print('INIT REDIS :\nwidth: {}\nheight: 1\nelments: {}'.format(str(len(spotsPins)), str(config.MOVING_TOYS_MAPPING)))
+    bdd.hmset('coffreElements', config.MOVING_TOYS_MAPPING)
+    bdd.hmset('coffreConfig', {'width': len(spotsPins), 'height': 1})
 
 def UpdateRedis(spotsPins, chestPin, pokePin, lightPin):
-    print('UPDATE Redis')
+    print('UPDATE REDIS')
+    i = 0
+    positionValue = {}
+    for spot, spotVal in spotsPins.items():
+        value = 0
+        if spotVal.value > config.ADC_THRESHOLD:
+            for toy, val in config.MOVING_TOYS_VALUES.items():
+                if val[0] <= spotVal.value <= val[1]:
+                    value = config.MOVING_TOYS_MAPPING[toy]
+                    break
+        positionValue[spot] = value
+        bdd.lset('coffrePosition', i, value)
+        i += 1
+    bdd.hmset('coffre', {'chest': chestPin.value, 'pokeball': pokePin.value, 'light': lightPin.value})
+    return positionValue
 
 
 if __name__ == '__main__':
@@ -63,20 +86,20 @@ if __name__ == '__main__':
     chestPin.direction = digitalio.Direction.INPUT
     chestPin.pull = digitalio.Pull.UP
 
-    pokePin = digitalio.DigitalInOut(config.FIXED_TOYS_PIN['POKEBALL'])
+    pokePin = digitalio.DigitalInOut(config.FIXED_TOYS_PIN['pokeball'])
     pokePin.direction = digitalio.Direction.INPUT
     pokePin.pull = digitalio.Pull.UP
 
-    lightPin = digitalio.DigitalInOut(config.FIXED_TOYS_PIN['LIGHT'])
+    lightPin = digitalio.DigitalInOut(config.FIXED_TOYS_PIN['light'])
     lightPin.direction = digitalio.Direction.INPUT
     lightPin.pull = digitalio.Pull.UP
 
     oldChest = chestPin
 
     # Send base data / config to redis
-    InitRedis()
-    DisplayValues(spotsPins, chestPin, pokePin, lightPin)
-    UpdateRedis(spotsPins, chestPin, pokePin, lightPin)
+    InitRedis(spotsPins)
+    positionValue = UpdateRedis(spotsPins, chestPin, pokePin, lightPin)
+    DisplayValues(spotsPins, chestPin, pokePin, lightPin, positionValue)
     if chestPin.value == 0:
         # Start Music
         sd.play(musicData[0], musicData[1])
@@ -88,15 +111,17 @@ if __name__ == '__main__':
         if chestPin.value != oldChest:
             # chest is now closed
             if chestPin.value == 0:
-                DisplayValues(spotsPins, chestPin, pokePin, lightPin)
+                print('CHEST CLOSED')
                 # Update Redis values
-                UpdateRedis(spotsPins, chestPin, pokePin, lightPin)
+                positionValue = UpdateRedis(spotsPins, chestPin, pokePin, lightPin)
+                DisplayValues(spotsPins, chestPin, pokePin, lightPin, positionValue)
 
                 # Start Music
                 sd.play(musicData[0], musicData[1])
                 currentMusic = sd.get_stream()
             # chest is now open
             else:
+                print('CHEST OPENED')
                 # Stop Music
                 if currentMusic is not None:
                     currentMusic.stop()
