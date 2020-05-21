@@ -8,7 +8,7 @@ REDIS_PWD = ''
 
 # Toys
 MOVING_TOYS_VALUES = {
-    'pompier': (18000, 22000),
+    'pompier': (53000, 57000),
     'patate': (38000, 42000)
 }
 

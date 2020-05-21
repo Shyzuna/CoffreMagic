@@ -99,7 +99,7 @@ if __name__ == '__main__':
     lightPin.direction = digitalio.Direction.INPUT
     lightPin.pull = digitalio.Pull.UP
 
-    oldChest = chestPin
+    oldChest = chestPin.value
 
     # Send base data / config to redis
     InitRedis(bdd, spotsPins)
@@ -132,7 +132,7 @@ if __name__ == '__main__':
                     currentMusic.stop()
 
         # Music Check loop
-        if currentMusic is not None and not currentMusic.active:
+        if currentMusic is not None and not currentMusic.active and not chestPin.value:
             sd.play(musicData[0], musicData[1])
             currentMusic = sd.get_stream()
 
