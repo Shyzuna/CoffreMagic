@@ -137,4 +137,4 @@ if __name__ == '__main__':
             currentMusic = sd.get_stream()
 
         oldChest = chestPin.value
-        #time.sleep(1)
+        time.sleep(1)
